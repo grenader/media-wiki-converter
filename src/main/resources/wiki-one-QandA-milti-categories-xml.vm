@@ -1,0 +1,21 @@
+<page>
+    <title>$pageName</title>
+    <revision>
+        <contributor>
+            <id>$adminUserId</id>
+        </contributor>
+        <text xml:space="preserve" bytes="112">Вопрос: '''$pageName'''
+
+Ответ ''Александра Геннадьевича'':
+
+$pageContent
+
+
+Источник: '''$pageSource'''
+
+$pageKeywords
+
+            $pageCategory</text>
+        <format>text/x-wiki</format>
+    </revision>
+</page>
