@@ -14,7 +14,7 @@
 $pageContent
 
 
-Источник: '''$pageSource'''
+Источник: '''[https://www.youtube.com/results?search_query=$pageSourceEncrypted $pageSource]'''
 
 $pageKeywords
 

@@ -13,15 +13,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.*;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 @RestController
 @EnableAutoConfiguration
 public class Example {
 
+    public static final int SKIP_FIRST_LINES = 1;
     private final VelocityEngine ve;
 
     @RequestMapping("/")
@@ -53,29 +58,10 @@ public class Example {
 
     }
 
+    List<Page> readExcelInputFile(String resourceFileName, int sheetNumber, int startingCount, int limitCount) {
 
-    List<String> readKeywords(String keywordsResourceFileName) {
-        InputStream inputStream = this.getClass().getResourceAsStream(keywordsResourceFileName);
-        BufferedReader b = new BufferedReader(new InputStreamReader(inputStream));
+        CategoryStrategy strategy = new KeywordsCategoryStrategy();
 
-        List<String> res = new ArrayList<>();
-        String readLine = "";
-        try {
-            while ((readLine = b.readLine()) != null) {
-                System.out.println(readLine);
-                res.add(readLine.toLowerCase().trim());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return res;
-    }
-
-    List<Page> readExcelInputFile(String resourceFileName, int sheetNumber, int limitCount) {
-
-        // Load keywords
-        List<String> keywords = readKeywords("/keywords.txt");
 
         List<Page> pages = new ArrayList();
         try {
@@ -100,24 +86,24 @@ public class Example {
                 }
             }
 
-            int startingPoint = 1;
-            for (int r = startingPoint; r < rows && r <= limitCount; r++) {
+            int startingPoint = SKIP_FIRST_LINES + startingCount;
+            for (int r = startingPoint; r < rows && r <= startingCount + limitCount; r++) {
                 row = sheet.getRow(r);
-                System.out.println("row = " + row);
+//                System.out.println("row = " + row);
                 if (row != null) {
 
-                    Page page = new Page(row.getCell(3).getStringCellValue(),
-                            row.getCell(4).getStringCellValue(),
-                            row.getCell(6).getStringCellValue(),
-                            getNewCategoryNameByKeywords(row, keywords),
-                            row.getCell(14).getStringCellValue());
+                    Page page = new Page(row.getCell(1).getStringCellValue(),
+                            row.getCell(2).getStringCellValue(),
+                            row.getCell(3).getStringCellValue(),
+                            row.getCell(7).getStringCellValue(),
+                            removeExtraCommas(row.getCell(6).getStringCellValue()));
 
-                    if (row.getCell(12) != null &&
-                            !StringUtils.isEmpty(row.getCell(12).getStringCellValue())
-                            && !"-".equals(row.getCell(12).getStringCellValue()))
+                    if (row.getCell(5) != null &&
+                            !StringUtils.isEmpty(row.getCell(5).getStringCellValue())
+                            && !"-".equals(row.getCell(5).getStringCellValue()))
                     // Video Answers
                     {
-                        page.setVideo(getVideoId(row.getCell(12).getStringCellValue()));
+                        page.setVideo(getVideoId(row.getCell(5).getStringCellValue()));
                     }
 
                     pages.add(page);
@@ -146,22 +132,19 @@ public class Example {
         return pages;
     }
 
-    String getCategoryNameBySource(HSSFRow row) {
-        return getCategoryName(row.getCell(6).getStringCellValue());
+    private String removeExtraCommas(String str) {
+        if (StringUtils.isEmpty(str))
+            return "";
+        str = str.trim();
+        if (str.startsWith(","))
+            str = str.substring(1, str.length());
+        if (str.endsWith(","))
+            str = str.substring(0, str.length() - 1);
+        return str.trim();
     }
 
-    String getNewCategoryNameByKeywords(HSSFRow row, List<String> keywords) {
-        List<String> list = getListOfCategories(row.getCell(14).getStringCellValue());
-
-        String res = "";
-        for (String one : list) {
-            // Skip some words
-            if (!keywords.contains(one))
-                continue;
-
-            res += "[[Категория:" + one + "]]\n";
-        }
-        return res;
+    String getCategoryNameBySource(HSSFRow row) {
+        return getCategoryName(row.getCell(6).getStringCellValue());
     }
 
     String getVideoId(String videoURL) {
@@ -176,22 +159,12 @@ public class Example {
         return tokenizer.nextToken(); // getting the second element
     }
 
-    List<String> getListOfCategories(String str) {
-        StringTokenizer tokenizer = new StringTokenizer(str, ",");
-
-        List<String> res = new ArrayList<>();
-        while (tokenizer.hasMoreTokens()) {
-            res.add(tokenizer.nextToken().trim().toLowerCase());
-        }
-        return res;
-    }
-
     public String generateQandAPage(Page page) {
         // Old format: one category
         //        Template t = ve.getTemplate("wiki-one-QandA-xml.vm", "UTF-8");
 
         // New format: several categories
-        Template t = ve.getTemplate("wiki-one-QandA-milti-categories-xml.vm", "UTF-8");
+        Template t = ve.getTemplate("wiki-one-QandA-xml.vm", "UTF-8");
 
 
         VelocityContext context = new VelocityContext();
@@ -199,6 +172,11 @@ public class Example {
         context.put("pageName", page.getPageName());
         context.put("pageContent", page.getPageContent());
         context.put("pageSource", page.getSource());
+        try {
+            context.put("pageSourceEncrypted", URLEncoder.encode(page.getSource(), "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         context.put("pageKeywords", page.getKeywords());
         context.put("pageCategory", page.getPageCategory());
 
@@ -209,13 +187,18 @@ public class Example {
 
 
     public String generateVideoPage(Page page) {
-        Template t = ve.getTemplate("wiki-one-video-multi-categories-xml.vm", "UTF-8");
+        Template t = ve.getTemplate("wiki-one-video-xml.vm", "UTF-8");
 
         VelocityContext context = new VelocityContext();
 
         context.put("pageName", page.getPageName());
         context.put("pageContent", page.getPageContent());
         context.put("pageSource", page.getSource());
+        try {
+            context.put("pageSourceEncrypted", URLEncoder.encode(page.getSource(), "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         context.put("pageKeywords", page.getKeywords());
         context.put("pageCategory", page.getPageCategory());
 
@@ -240,6 +223,15 @@ public class Example {
         t.merge(context, writer);
 
         return writer.toString();
+    }
+
+
+    public String generateHomePage(List<String> strings) {
+        Set<String> cats = new TreeSet<>(strings);
+
+        String allCategories = cats.stream().map(str -> "[[:Категория:" + str + "|" + str + "]]\n").collect(Collectors.joining("\n"));
+
+        return "<h1>Разделы энциклопедии</h1>\n\n" + allCategories;
     }
 }
 
