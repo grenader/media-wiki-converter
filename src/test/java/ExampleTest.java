@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Created by ikanshyn on 2017-07-11.
@@ -28,7 +29,7 @@ public class ExampleTest {
         assertEquals("Развитие человека и самопознание", page.getPageCategory());
         assertEquals("сердце, желание", page.getKeywords());
         assertEquals("3O5BSKjUZRc", page.getVideo());
-        assertEquals("Фрагмент лекции Александра Геннадьевича Хакимова ~Иллюзия и реальность~, 27.12.2015, г. Екатеринбург, Россия.", page.getSource());
+        assertEquals("Фрагмент лекции Александра Геннадьевича Хакимова \"Иллюзия и реальность\", 27.12.2015, г. Екатеринбург, Россия.", page.getSource());
     }
 
     @Test
@@ -71,7 +72,7 @@ public class ExampleTest {
 
     @Test
     public void testGenerateVideoPage() {
-        Page testPage = new Page("Title", "Content", "Source Text", "Cat1", "Keywords");
+        Page testPage = new Page("Title", "Content", "Source \"Text\"", "Cat1", "Keywords");
         testPage.setVideo("XXXaaXXX");
 
         String generateXML = service.generateVideoPage(testPage);
@@ -94,7 +95,39 @@ public class ExampleTest {
                 "Content\n" +
                 "\n" +
                 "\n" +
-                "Источник: '''[https://www.youtube.com/results?search_query=Source+Text Source Text]'''\n" +
+                "Источник: '''[https://www.youtube.com/results?search_query=Source+Text Source \"Text\"]'''\n" +
+                "\n" +
+                "Keywords\n" +
+                "\n" +
+                "            [[Категория:Cat1]]</text>\n" +
+                "        <format>text/x-wiki</format>\n" +
+                "    </revision>\n" +
+                "</page>\n", generateXML);
+    }
+
+    @Test
+    public void testGenerateVideoPage_noSource() {
+        Page testPage = new Page("Title", "Content", null, "Cat1", "Keywords");
+        testPage.setVideo("XXXaaXXX");
+
+        String generateXML = service.generateVideoPage(testPage);
+
+        System.out.println("generateVideoPage = " + generateXML);
+
+        assertEquals("<page>\n" +
+                "    <title>Title</title>\n" +
+                "    <revision>\n" +
+                "        <contributor>\n" +
+                "            <id>$adminUserId</id>\n" +
+                "        </contributor>\n" +
+                "        <text xml:space=\"preserve\" bytes=\"112\">{{#widget:YouTube|id=XXXaaXXX}}\n" +
+                "\n" +
+                "Вопрос: '''Title'''\n" +
+                "\n" +
+                "\n" +
+                "Ответ ''Александра Геннадьевича'':\n" +
+                "\n" +
+                "Content\n" +
                 "\n" +
                 "Keywords\n" +
                 "\n" +
@@ -184,9 +217,9 @@ public class ExampleTest {
     @Test
     public void testGenerateXML() throws IOException {
 
-        int maxNumberOfLines = 10;
+        int maxNumberOfLines = 900;
 
-        List<Page> pages = service.readExcelInputFile("bigData20190912.xls", 0, 0, maxNumberOfLines);
+        List<Page> pages = service.readExcelInputFile("allData20190914.xls", 0, 0, maxNumberOfLines);
 
         List<String> pagesXML = new ArrayList<>();
         for (Page page : pages) {
@@ -206,6 +239,24 @@ public class ExampleTest {
         System.out.println(fullXML);
     }
 
+
+    @Test
+    public void testReadExcelInputFile_noSource() throws IOException {
+
+        int maxNumberOfLines = 1;
+
+        List<Page> pages = service.readExcelInputFile("noSourceData.xls", 0, 0, maxNumberOfLines);
+
+        assertEquals(1, pages.size());
+        Page page = pages.get(0);
+        assertEquals("Как воспитывать детей, когда родители не являются авторитетами для детей?", page.getPageName());
+        assertEquals("Когда родители не являются авторитетами для детей их, можно воспитывать, указывая или ссылаясь на других авторитетных людей: духовных учителей, литературные образы, исторических личностей, святых.",
+                page.getPageContent());
+        assertEquals("Воспитание", page.getPageCategory());
+        assertEquals("родители, авторитеты, дети, авторитетные люди, духовные учителя, литературные образы, исторические личности, святые", page.getKeywords());
+        assertNull(page.getSource());
+    }
+
     @Test
     public void testGenerateHomePage() throws IOException {
 
@@ -213,6 +264,8 @@ public class ExampleTest {
 
         String res = service.generateHomePage(strings);
         assertEquals("<h1>Разделы энциклопедии</h1>\n" +
+                "\n" +
+                "[[:Категория:Благотворительность|Благотворительность]]\n" +
                 "\n" +
                 "[[:Категория:Веды|Веды]]\n" +
                 "\n" +
@@ -224,13 +277,15 @@ public class ExampleTest {
                 "\n" +
                 "[[:Категория:Здоровье|Здоровье]]\n" +
                 "\n" +
-                "[[:Категория:Карма и реинкарнация|Карма и реинкарнация]]\n" +
+                "[[:Категория:Искусство|Искусство]]\n" +
                 "\n" +
                 "[[:Категория:Любовь|Любовь]]\n" +
                 "\n" +
                 "[[:Категория:Мужчина|Мужчина]]\n" +
                 "\n" +
                 "[[:Категория:Мужчины и женщины|Мужчины и женщины]]\n" +
+                "\n" +
+                "[[:Категория:Образование|Образование]]\n" +
                 "\n" +
                 "[[:Категория:Общество|Общество]]\n" +
                 "\n" +
@@ -245,6 +300,8 @@ public class ExampleTest {
                 "[[:Категория:Религия|Религия]]\n" +
                 "\n" +
                 "[[:Категория:Семья|Семья]]\n" +
+                "\n" +
+                "[[:Категория:Судьба, карма и реинкарнация|Судьба, карма и реинкарнация]]\n" +
                 "\n" +
                 "[[:Категория:Успех|Успех]]\n", res);
     }

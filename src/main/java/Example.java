@@ -94,7 +94,7 @@ public class Example {
 
                     Page page = new Page(row.getCell(1).getStringCellValue(),
                             row.getCell(2).getStringCellValue(),
-                            row.getCell(3).getStringCellValue(),
+                            replaceTildas(row.getCell(3) != null ? row.getCell(3).getStringCellValue(): null),
                             row.getCell(7).getStringCellValue(),
                             removeExtraCommas(row.getCell(6).getStringCellValue()));
 
@@ -130,6 +130,12 @@ public class Example {
         }
 
         return pages;
+    }
+
+    private String replaceTildas(String str) {
+        if (str == null)
+            return str;
+        return str.replaceAll("~", "\"");
     }
 
     private String removeExtraCommas(String str) {
@@ -195,7 +201,14 @@ public class Example {
         context.put("pageContent", page.getPageContent());
         context.put("pageSource", page.getSource());
         try {
-            context.put("pageSourceEncrypted", URLEncoder.encode(page.getSource(), "UTF-8"));
+            String searchString = page.getSource();
+            if (searchString != null) {
+                searchString = searchString.replaceAll("\"", "");
+                context.put("pageSourceEncrypted", URLEncoder.encode(searchString, "UTF-8"));
+                context.put("hasSource", true);
+            }
+            else
+                context.put("hasSource", false);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
