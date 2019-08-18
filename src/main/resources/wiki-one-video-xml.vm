@@ -14,7 +14,9 @@
 $pageContent
 
 #if( $hasSource )
-Источник: '''[https://www.youtube.com/results?search_query=$pageSourceEncrypted $pageSource]'''
+
+''Источник: '''[https://www.youtube.com/results?search_query=$pageSourceEncrypted $pageSource]''' ''
+
 #end
 $pageKeywords
 

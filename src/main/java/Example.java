@@ -14,12 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.*;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -94,7 +89,7 @@ public class Example {
 
                     Page page = new Page(row.getCell(1).getStringCellValue(),
                             row.getCell(2).getStringCellValue(),
-                            replaceTildas(row.getCell(3) != null ? row.getCell(3).getStringCellValue(): null),
+                            replaceTildas(getStringOrNull(row.getCell(3))),
                             row.getCell(7).getStringCellValue(),
                             removeExtraCommas(row.getCell(6).getStringCellValue()));
 
@@ -130,6 +125,17 @@ public class Example {
         }
 
         return pages;
+    }
+
+    private String getStringOrNull(HSSFCell cell) {
+        if (cell == null)
+            return null;
+        String value = cell.getStringCellValue().trim();
+
+        if (StringUtils.isEmpty(value))
+            return null;
+        else
+            return value;
     }
 
     private String replaceTildas(String str) {
@@ -179,7 +185,13 @@ public class Example {
         context.put("pageContent", page.getPageContent());
         context.put("pageSource", page.getSource());
         try {
-            context.put("pageSourceEncrypted", URLEncoder.encode(page.getSource(), "UTF-8"));
+            String searchString = page.getSource();
+            if (searchString != null) {
+                searchString = searchString.replaceAll("\"", "");
+                context.put("pageSourceEncrypted", URLEncoder.encode(searchString, "UTF-8"));
+                context.put("hasSource", true);
+            } else
+                context.put("hasSource", false);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -206,13 +218,12 @@ public class Example {
                 searchString = searchString.replaceAll("\"", "");
                 context.put("pageSourceEncrypted", URLEncoder.encode(searchString, "UTF-8"));
                 context.put("hasSource", true);
-            }
-            else
+            } else
                 context.put("hasSource", false);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        context.put("pageKeywords", page.getKeywords());
+        context.put("pageKeywords", generateKeywordsBlock(page.getKeywords()));
         context.put("pageCategory", page.getPageCategory());
 
         context.put("pageVideoId", page.getVideo());
@@ -220,6 +231,13 @@ public class Example {
         StringWriter writer = new StringWriter();
         t.merge(context, writer);
         return writer.toString();
+    }
+
+    String generateKeywordsBlock(String keywords) {
+
+        List<String> keys = Arrays.asList(keywords.split(","));
+
+        return keys.stream().map(String::trim).filter(v -> !StringUtils.isEmpty(v)).map(v -> getKeywordSearchLine(v)).collect(Collectors.joining(", "));
     }
 
     public String generateFullXML(List<String> pages) {
@@ -245,6 +263,19 @@ public class Example {
         String allCategories = cats.stream().map(str -> "[[:Категория:" + str + "|" + str + "]]\n").collect(Collectors.joining("\n"));
 
         return "<h1>Разделы энциклопедии</h1>\n\n" + allCategories;
+    }
+
+    public String getKeywordSearchLine(String keyword) {
+        if (StringUtils.isEmpty(keyword))
+            throw new IllegalArgumentException("keyword cannot be null or empty");
+
+        try {
+            return "[{{SERVER}}/index.php?search=" + URLEncoder.encode(keyword, "UTF-8") +
+                    "&amp;title=Служебная%3AПоиск&amp;go=Перейти " + keyword + "]";
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 }
 

@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,7 +73,7 @@ public class ExampleTest {
 
     @Test
     public void testGenerateVideoPage() {
-        Page testPage = new Page("Title", "Content", "Source \"Text\"", "Cat1", "Keywords");
+        Page testPage = new Page("Title", "Content", "Source \"Text\"", "Cat1", "key1, key2, key3");
         testPage.setVideo("XXXaaXXX");
 
         String generateXML = service.generateVideoPage(testPage);
@@ -95,9 +96,9 @@ public class ExampleTest {
                 "Content\n" +
                 "\n" +
                 "\n" +
-                "Источник: '''[https://www.youtube.com/results?search_query=Source+Text Source \"Text\"]'''\n" +
+                "''Источник: '''[https://www.youtube.com/results?search_query=Source+Text Source \"Text\"]''' ''\n" +
                 "\n" +
-                "Keywords\n" +
+                "[{{SERVER}}/index.php?search=key1&amp;title=Служебная%3AПоиск&amp;go=Перейти key1], [{{SERVER}}/index.php?search=key2&amp;title=Служебная%3AПоиск&amp;go=Перейти key2], [{{SERVER}}/index.php?search=key3&amp;title=Служебная%3AПоиск&amp;go=Перейти key3]\n"+
                 "\n" +
                 "            [[Категория:Cat1]]</text>\n" +
                 "        <format>text/x-wiki</format>\n" +
@@ -129,7 +130,7 @@ public class ExampleTest {
                 "\n" +
                 "Content\n" +
                 "\n" +
-                "Keywords\n" +
+                "[{{SERVER}}/index.php?search=Keywords&amp;title=Служебная%3AПоиск&amp;go=Перейти Keywords]\n" +
                 "\n" +
                 "            [[Категория:Cat1]]</text>\n" +
                 "        <format>text/x-wiki</format>\n" +
@@ -241,7 +242,7 @@ public class ExampleTest {
 
 
     @Test
-    public void testReadExcelInputFile_noSource() throws IOException {
+    public void testReadExcelInputFile_noSource() {
 
         int maxNumberOfLines = 1;
 
@@ -254,11 +255,26 @@ public class ExampleTest {
                 page.getPageContent());
         assertEquals("Воспитание", page.getPageCategory());
         assertEquals("родители, авторитеты, дети, авторитетные люди, духовные учителя, литературные образы, исторические личности, святые", page.getKeywords());
+
         assertNull(page.getSource());
     }
 
     @Test
-    public void testGenerateHomePage() throws IOException {
+    public void testReadExcelInputFile_emptySource()  {
+
+        int maxNumberOfLines = 1;
+
+        List<Page> pages = service.readExcelInputFile("noSourceData.xls", 0, 1, maxNumberOfLines);
+
+        assertEquals(1, pages.size());
+        Page page = pages.get(0);
+        assertEquals("Что должно дать воспитание в семье?", page.getPageName());
+
+        assertNull(page.getSource());
+    }
+
+    @Test
+    public void testGenerateHomePage() {
 
         List<String> strings = MWFileUtils.readKeywords(this.getClass(), "categories.txt", false);
 
@@ -304,6 +320,23 @@ public class ExampleTest {
                 "[[:Категория:Судьба, карма и реинкарнация|Судьба, карма и реинкарнация]]\n" +
                 "\n" +
                 "[[:Категория:Успех|Успех]]\n", res);
+    }
+
+    @Test
+    public void testGetKeywordSearchLine() {
+        String keyword = "keyword";
+
+        assertEquals("[{{SERVER}}/index.php?search=keyword&amp;title=Служебная%3AПоиск&amp;go=Перейти keyword]",
+                service.getKeywordSearchLine(keyword));
+    }
+
+  @Test
+    public void testGenerateKeywordsBlock() {
+        String keyword = "key1, key2, key3";
+
+        assertEquals("[{{SERVER}}/index.php?search=key1&amp;title=Служебная%3AПоиск&amp;go=Перейти key1], [{{SERVER}}/index.php?search=key2&amp;title=Служебная%3AПоиск&amp;go=Перейти key2], [{{SERVER}}/index.php?search=key3&amp;title=Служебная%3AПоиск&amp;go=Перейти key3]",
+                service.generateKeywordsBlock(keyword));
+
     }
 
 }
