@@ -1,0 +1,4 @@
+2019June15: Pulling from grenader/mw-mediawiki
+Digest: sha256:c0927ba55971ee0ed5cfda90a09b4a7dbf785b43931aa7e76bf1ea4b06a78b70
+Status: Image is up to date for grenader/mw-mediawiki:2019June15
+docker.io/grenader/mw-mediawiki:2019June15
