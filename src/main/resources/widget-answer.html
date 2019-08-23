@@ -1,0 +1,25 @@
+<noinclude>
+    This widget allows you to put a border around your test to your wiki page.
+    Edit the page: http://<domain>/index.php/Widget:Answer
+
+    == Using this widget ==
+    Place the following text to your page:
+    {{#widget:Answer|text=My Text}}
+
+    == Copy to your site ==
+    To use this widget on your site, just install the [https://www.mediawiki.org/wiki/Extension:Widgets MediaWiki Widgets extension] and the copy [{{fullurl:{{FULLPAGENAME}}|action=edit}} full source code] of this page to your wiki, as an article called '''{{FULLPAGENAME}}'''.
+</noinclude><includeonly>
+    <style>
+        .answer {
+            text-align: left;
+            border: 1px solid #a2a9b1;
+            background-color: #f8f9fa;
+            padding: 5px;
+            margin-top: 1em;
+            clear: both;
+        }
+    </style>
+    <div class='answer'>
+        <div><!--{$text}--></div>
+    </div>
+</includeonly>

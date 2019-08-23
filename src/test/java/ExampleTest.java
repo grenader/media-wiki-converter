@@ -92,13 +92,12 @@ public class ExampleTest {
                 "\n" +
                 "\n" +
                 "Ответ ''Александра Геннадьевича'':\n" +
+                "{{#widget:Answer|text=Content}}\n" +
                 "\n" +
-                "Content\n" +
                 "\n" +
+                "''Источник: [https://www.youtube.com/results?search_query=Source+Text Source \"Text\"]''\n" +
                 "\n" +
-                "''Источник: '''[https://www.youtube.com/results?search_query=Source+Text Source \"Text\"]''' ''\n" +
-                "\n" +
-                "[{{SERVER}}/index.php?search=key1&amp;title=Служебная%3AПоиск&amp;go=Перейти key1], [{{SERVER}}/index.php?search=key2&amp;title=Служебная%3AПоиск&amp;go=Перейти key2], [{{SERVER}}/index.php?search=key3&amp;title=Служебная%3AПоиск&amp;go=Перейти key3]\n"+
+                "Ключевые слова: [{{SERVER}}/index.php?search=key1&amp;title=Служебная%3AПоиск&amp;go=Перейти key1], [{{SERVER}}/index.php?search=key2&amp;title=Служебная%3AПоиск&amp;go=Перейти key2], [{{SERVER}}/index.php?search=key3&amp;title=Служебная%3AПоиск&amp;go=Перейти key3]\n"+
                 "\n" +
                 "            [[Категория:Cat1]]</text>\n" +
                 "        <format>text/x-wiki</format>\n" +
@@ -127,10 +126,9 @@ public class ExampleTest {
                 "\n" +
                 "\n" +
                 "Ответ ''Александра Геннадьевича'':\n" +
+                "{{#widget:Answer|text=Content}}\n" +
                 "\n" +
-                "Content\n" +
-                "\n" +
-                "[{{SERVER}}/index.php?search=Keywords&amp;title=Служебная%3AПоиск&amp;go=Перейти Keywords]\n" +
+                "Ключевые слова: [{{SERVER}}/index.php?search=Keywords&amp;title=Служебная%3AПоиск&amp;go=Перейти Keywords]\n" +
                 "\n" +
                 "            [[Категория:Cat1]]</text>\n" +
                 "        <format>text/x-wiki</format>\n" +
@@ -218,7 +216,7 @@ public class ExampleTest {
     @Test
     public void testGenerateXML() throws IOException {
 
-        int maxNumberOfLines = 900;
+        int maxNumberOfLines = 800;
 
         List<Page> pages = service.readExcelInputFile("allData20190914.xls", 0, 0, maxNumberOfLines);
 

@@ -10,15 +10,14 @@
 
 
 Ответ ''Александра Геннадьевича'':
-
-$pageContent
+{{#widget:Answer|text=$pageContent}}
 
 #if( $hasSource )
 
-''Источник: '''[https://www.youtube.com/results?search_query=$pageSourceEncrypted $pageSource]''' ''
+''Источник: [https://www.youtube.com/results?search_query=$pageSourceEncrypted $pageSource]''
 
 #end
-$pageKeywords
+Ключевые слова: $pageKeywords
 
             [[Категория:$pageCategory]]</text>
         <format>text/x-wiki</format>
