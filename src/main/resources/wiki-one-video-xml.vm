@@ -9,7 +9,7 @@
 Вопрос: '''$pageName'''
 
 
-Ответ ''Александра Геннадьевича'':
+Ответ Александра Геннадьевича:
 {{#widget:Answer|text=$pageContent}}
 
 #if( $hasSource )

@@ -1,11 +1,11 @@
 import org.apache.commons.io.FileUtils;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -14,9 +14,9 @@ import static org.junit.Assert.assertNull;
 /**
  * Created by ikanshyn on 2017-07-11.
  */
-public class ExampleTest {
+public class MediaWikiProcessorTest {
 
-    Example service = new Example();
+    MediaWikiProcessor service = new MediaWikiProcessor();
 
     @Test
     public void testRealExcelInputFile_oneLine() {
@@ -91,13 +91,13 @@ public class ExampleTest {
                 "Вопрос: '''Title'''\n" +
                 "\n" +
                 "\n" +
-                "Ответ ''Александра Геннадьевича'':\n" +
+                "Ответ Александра Геннадьевича:\n" +
                 "{{#widget:Answer|text=Content}}\n" +
                 "\n" +
                 "\n" +
                 "''Источник: [https://www.youtube.com/results?search_query=Source+Text Source \"Text\"]''\n" +
                 "\n" +
-                "Ключевые слова: [{{SERVER}}/index.php?search=key1&amp;title=Служебная%3AПоиск&amp;go=Перейти key1], [{{SERVER}}/index.php?search=key2&amp;title=Служебная%3AПоиск&amp;go=Перейти key2], [{{SERVER}}/index.php?search=key3&amp;title=Служебная%3AПоиск&amp;go=Перейти key3]\n"+
+                "Ключевые слова: [{{SERVER}}/index.php?search=key1&amp;title=Служебная%3AПоиск&amp;go=Перейти key1], [{{SERVER}}/index.php?search=key2&amp;title=Служебная%3AПоиск&amp;go=Перейти key2], [{{SERVER}}/index.php?search=key3&amp;title=Служебная%3AПоиск&amp;go=Перейти key3]\n" +
                 "\n" +
                 "            [[Категория:Cat1]]</text>\n" +
                 "        <format>text/x-wiki</format>\n" +
@@ -125,7 +125,7 @@ public class ExampleTest {
                 "Вопрос: '''Title'''\n" +
                 "\n" +
                 "\n" +
-                "Ответ ''Александра Геннадьевича'':\n" +
+                "Ответ Александра Геннадьевича:\n" +
                 "{{#widget:Answer|text=Content}}\n" +
                 "\n" +
                 "Ключевые слова: [{{SERVER}}/index.php?search=Keywords&amp;title=Служебная%3AПоиск&amp;go=Перейти Keywords]\n" +
@@ -216,9 +216,9 @@ public class ExampleTest {
     @Test
     public void testGenerateXML() throws IOException {
 
-        int maxNumberOfLines = 800;
+        int maxNumberOfLines = 100;
 
-        List<Page> pages = service.readExcelInputFile("allData20190914.xls", 0, 0, maxNumberOfLines);
+        List<Page> pages = service.readExcelInputFile("allData20190914.xls", 0, 800, maxNumberOfLines);
 
         List<String> pagesXML = new ArrayList<>();
         for (Page page : pages) {
@@ -237,6 +237,63 @@ public class ExampleTest {
         System.out.println("\n\n");
         System.out.println(fullXML);
     }
+
+    @Test
+    public void testGenerateListOfContents_two() throws IOException {
+        List<Page> pages = Arrays.asList(new Page("", "", "", "cat1", ""),
+                new Page("", "", "", "cat2", ""));
+
+        String res = service.generateListOfContentsPage(pages);
+
+        assertEquals("<h1>Разделы энциклопедии</h1>\n" +
+                "\n" +
+                "[[:Категория:cat1|cat1]]\n" +
+                "\n" +
+                "[[:Категория:cat2|cat2]]\n", res);
+    }
+
+    @Test
+    public void testGenerateListOfContents_two_unsorded() throws IOException {
+        List<Page> pages = Arrays.asList(new Page("", "", "", "bbb", ""),
+                new Page("", "", "", "aaa", ""));
+
+        String res = service.generateListOfContentsPage(pages);
+
+        assertEquals("<h1>Разделы энциклопедии</h1>\n" +
+                "\n" +
+                "[[:Категория:aaa|aaa]]\n" +
+                "\n" +
+                "[[:Категория:bbb|bbb]]\n", res);
+    }
+
+    @Test
+    public void testGenerateListOfContents_two_with_duplicate() throws IOException {
+        List<Page> pages = Arrays.asList(new Page("", "", "", "cat1", ""),
+                new Page("", "", "", "cat2", ""),
+                new Page("", "", "", "cat1", ""));
+
+        String res = service.generateListOfContentsPage(pages);
+
+        assertEquals("<h1>Разделы энциклопедии</h1>\n" +
+                "\n" +
+                "[[:Категория:cat1|cat1]]\n" +
+                "\n" +
+                "[[:Категория:cat2|cat2]]\n", res);
+    }
+
+
+    @Test
+    public void testGenerateListOfContents() throws IOException {
+
+        List<Page> pages = service.readExcelInputFile("allData20190914.xls", 0, 0, 10000);
+        String categoriesContent = service.generateListOfContentsPage(pages);
+
+//        FileUtils.writeStringToFile(new File("files/new-simple-" + maxNumberOfLines + ".xml"), fullXML, "UTF-8");
+
+        System.out.println("\n\n");
+        System.out.println(categoriesContent);
+    }
+
 
 
     @Test
@@ -258,7 +315,7 @@ public class ExampleTest {
     }
 
     @Test
-    public void testReadExcelInputFile_emptySource()  {
+    public void testReadExcelInputFile_emptySource() {
 
         int maxNumberOfLines = 1;
 
@@ -328,7 +385,7 @@ public class ExampleTest {
                 service.getKeywordSearchLine(keyword));
     }
 
-  @Test
+    @Test
     public void testGenerateKeywordsBlock() {
         String keyword = "key1, key2, key3";
 

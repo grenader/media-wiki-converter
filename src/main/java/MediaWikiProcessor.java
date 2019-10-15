@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @EnableAutoConfiguration
-public class Example {
+public class MediaWikiProcessor {
 
     public static final int SKIP_FIRST_LINES = 1;
     private final VelocityEngine ve;
@@ -30,13 +30,13 @@ public class Example {
     }
 
     public static void main(String[] args) throws Exception {
-        SpringApplication.run(Example.class, args);
+        SpringApplication.run(MediaWikiProcessor.class, args);
 
         perform();
 
     }
 
-    public Example() {
+    public MediaWikiProcessor() {
 
         ve = new VelocityEngine();
         Properties p = new Properties();
@@ -276,6 +276,17 @@ public class Example {
             e.printStackTrace();
             return "";
         }
+    }
+
+    public String generateListOfContentsPage(List<Page> pages) {
+
+        Set<String> sortedCategories = new TreeSet(pages.stream().map(map -> map.getPageCategory()).collect(Collectors.toSet()));
+
+        StringBuilder res = new StringBuilder("<h1>Разделы энциклопедии</h1>\n");
+        for (String category : sortedCategories) {
+            res.append("\n" + "[[:Категория:").append(category).append("|").append(category).append("]]\n");
+        }
+        return res.toString();
     }
 }
 
