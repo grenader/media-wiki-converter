@@ -16,5 +16,4 @@ imageId=$(echo "${BASH_REMATCH[1]}" | sed 's/ .*//' | xargs)
 echo "-------------------------------"
 echo "Downloaded imageId: $imageId"
 
-docker run --name new3mw1 --link mysql56 -p 80:80 -e MEDIAWIKI_SITE_SERVER=http://wikivedas.com  -e MEDIAWIKI_ADMIN_PASS=11 -e MEDIAWIKI_DB_PASSWORD=11 -e MEDIAWIKI_DB_NAME=mw_db3 -e MEDIAWIKI_DB_USER=root  -e MEDIAWIKI_DB_HOST=mysql56 -d $imageId
-
+docker run --name new2mw7 --link mysql56 -p 80:80 -e MEDIAWIKI_SITE_SERVER=http://localhost  -e MEDIAWIKI_ADMIN_PASS=11 -e MEDIAWIKI_DB_PASSWORD=11 -e MEDIAWIKI_DB_NAME=mw_db2 -e MEDIAWIKI_DB_USER=root -e MEDIAWIKI_DB_HOST=mysql56 -d $imageId
