@@ -1,0 +1,10 @@
+<page>
+    <title>Шаблон:ListOfContent</title>
+    <revision>
+        <contributor>
+            <id>$adminUserId</id>
+        </contributor>
+        <text xml:space="preserve" bytes="112">&lt;h1&gt;Разделы энциклопедии&lt;/h1&gt;$allCategories</text>
+        <format>text/x-wiki</format>
+    </revision>
+</page>

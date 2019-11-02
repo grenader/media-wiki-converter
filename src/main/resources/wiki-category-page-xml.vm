@@ -1,0 +1,10 @@
+<page>
+    <title>$pageTitle</title>
+    <revision>
+        <contributor>
+            <id>$adminUserId</id>
+        </contributor>
+        <text xml:space="preserve" bytes="0"/>
+        <format>text/x-wiki</format>
+    </revision>
+</page>

@@ -233,6 +233,19 @@ public class MediaWikiProcessor {
         return writer.toString();
     }
 
+
+    public String generateListOfContentsTemplatePage(String content) {
+        Template t = ve.getTemplate("wiki-ListOfContents-xml.vm", "UTF-8");
+
+        VelocityContext context = new VelocityContext();
+
+        context.put("allCategories", content);
+
+        StringWriter writer = new StringWriter();
+        t.merge(context, writer);
+        return writer.toString();
+    }
+
     String generateKeywordsBlock(String keywords) {
 
         List<String> keys = Arrays.asList(keywords.split(","));
@@ -240,14 +253,14 @@ public class MediaWikiProcessor {
         return keys.stream().map(String::trim).filter(v -> !StringUtils.isEmpty(v)).map(v -> getKeywordSearchLine(v)).collect(Collectors.joining(", "));
     }
 
-    public String generateFullXML(List<String> pages) {
+    public String generateFullXML(String keywordName, List<String> contentItems) {
         /*  first, get and initialize an engine  */
         /*  next, get the Template  */
         Template t = ve.getTemplate("wiki-header-xml.vm", "UTF-8");
         /*  create a context and add data */
         VelocityContext context = new VelocityContext();
 
-        context.put("pages", String.join("\n", pages));
+        context.put(keywordName, String.join("\n", contentItems));
 
         /* now render the template into a StringWriter */
         StringWriter writer = new StringWriter();
@@ -278,15 +291,46 @@ public class MediaWikiProcessor {
         }
     }
 
-    public String generateListOfContentsPage(List<Page> pages) {
+    public String generateListOfContents(List<Page> pages) {
 
-        Set<String> sortedCategories = new TreeSet(pages.stream().map(map -> map.getPageCategory()).collect(Collectors.toSet()));
+        Set<String> sortedCategories = getSortedCategories(pages);
 
-        StringBuilder res = new StringBuilder("<h1>Разделы энциклопедии</h1>\n");
+        StringBuilder res = new StringBuilder();
         for (String category : sortedCategories) {
             res.append("\n" + "[[:Категория:").append(category).append("|").append(category).append("]]\n");
         }
         return res.toString();
+    }
+
+
+    public String generateCategoryPage(String pageName) {
+        Template t = ve.getTemplate("wiki-category-page-xml.vm", "UTF-8");
+
+        VelocityContext context = new VelocityContext();
+
+        context.put("pageTitle", pageName);
+
+        StringWriter writer = new StringWriter();
+        t.merge(context, writer);
+        return writer.toString();
+    }
+
+     TreeSet<String> getSortedCategories(List<Page> pages) {
+        return pages.stream().filter(name -> name.getPageCategory() != null && name.getPageCategory().length() > 1).map(Page::getPageCategory).distinct().collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    public String generateAllCategoryPagesXML(List<Page> pages) {
+
+        TreeSet<String> sortedCategories = getSortedCategories(pages);
+
+        StringBuilder res = new StringBuilder();
+
+        for (String categoryName : sortedCategories) {
+            res.append(generateCategoryPage("Категория:"+categoryName)).append("\n");
+        }
+//        String allCategories = cats.stream().map(str -> "[[:Категория:" + str + "|" + str + "]]\n").collect(Collectors.joining("\n"));
+
+        return generateFullXML("pages",  Collections.singletonList(res.toString()));
     }
 }
 
