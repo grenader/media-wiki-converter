@@ -1,5 +1,15 @@
+package com.grenader.mediawiki;
+
+import com.grenader.mediawiki.MWFileUtils;
+import com.grenader.mediawiki.MediaWikiProcessor;
+import com.grenader.mediawiki.Page;
+import com.grenader.mediawiki.TemplateHandlingService;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,13 +21,19 @@ import static org.junit.Assert.assertNull;
 /**
  * Created by ikanshyn on 2017-07-11.
  */
+@RunWith(SpringRunner.class)
+@SpringBootTest
 public class MediaWikiProcessorTest {
 
-    MediaWikiProcessor service = new MediaWikiProcessor();
+    @Autowired
+    MediaWikiProcessor service;
+
+    @Autowired
+    TemplateHandlingService templateService;
 
     @Test
     public void testRealExcelInputFile_oneLine() {
-        List<Page> pages = service.readExcelInputFile("bigData20190912.xls", 0, 0, 1);
+        List<Page> pages = service.readExcelInputFile("/bigData20190912.xls", 0, 0, 1);
 
         assertEquals(1, pages.size());
         Page page = pages.get(0);
@@ -135,7 +151,7 @@ public class MediaWikiProcessorTest {
 
     @Test
     public void testGenerateOnePageBlock_likeReal() {
-        Page testPage = new Page("AutoTest Page Title", "Auto Test Page Content. I am not a velocity guru but maybe you need to see if\n" +
+        Page testPage = new Page("AutoTest com.grenader.mediawiki.Page Title", "Auto Test com.grenader.mediawiki.Page Content. I am not a velocity guru but maybe you need to see if\n" +
                 "velocity has a classpath loader? I think the file\n" +
                 "loader reads from the file system so you will need to\n" +
                 "use the ExternalContext getRequest and get the full\n" +
@@ -159,7 +175,7 @@ public class MediaWikiProcessorTest {
         pages.add("<page>page1</page>");
         pages.add("<page>page2</page>");
         pages.add("<page>page3</page>");
-        String fullXML = service.generateFullXML("pages", pages);
+        String fullXML = templateService.generateFullXML("pages", pages);
 
         assertEquals("<mediawiki xmlns=\"http://www.mediawiki.org/xml/export-0.9/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
                 "           xsi:schemaLocation=\"http://www.mediawiki.org/xml/export-0.9/ http://www.mediawiki.org/xml/export-0.9.xsd\"\n" +
@@ -227,7 +243,7 @@ public class MediaWikiProcessorTest {
             pagesXML.add(onePageBlock);
         }
 
-        String fullXML = service.generateFullXML("pages", pagesXML);
+        String fullXML = templateService.generateFullXML("pages", pagesXML);
 
         FileUtils.writeStringToFile(new File("files/new-simple-" + maxNumberOfLines + ".xml"), fullXML, "UTF-8");
 
@@ -236,159 +252,11 @@ public class MediaWikiProcessorTest {
     }
 
     @Test
-    public void testGenerateCategoryPages_two() throws IOException {
-        List<Page> pages = Arrays.asList(new Page("", "", "", "cat1", ""),
-                new Page("", "", "", "cat2", ""));
-
-        String fullXML = service.generateAllCategoryPagesXML(pages);
-
-        assertEquals("<mediawiki xmlns=\"http://www.mediawiki.org/xml/export-0.9/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                "           xsi:schemaLocation=\"http://www.mediawiki.org/xml/export-0.9/ http://www.mediawiki.org/xml/export-0.9.xsd\"\n" +
-                "           version=\"0.9\" xml:lang=\"ru\">\n" +
-                "<page>\n" +
-                "    <title>Категория:cat1</title>\n" +
-                "    <revision>\n" +
-                "        <contributor>\n" +
-                "            <id>$adminUserId</id>\n" +
-                "        </contributor>\n" +
-                "        <text xml:space=\"preserve\" bytes=\"0\"/>\n" +
-                "        <format>text/x-wiki</format>\n" +
-                "    </revision>\n" +
-                "</page>\n" +
-                "<page>\n" +
-                "    <title>Категория:cat2</title>\n" +
-                "    <revision>\n" +
-                "        <contributor>\n" +
-                "            <id>$adminUserId</id>\n" +
-                "        </contributor>\n" +
-                "        <text xml:space=\"preserve\" bytes=\"0\"/>\n" +
-                "        <format>text/x-wiki</format>\n" +
-                "    </revision>\n" +
-                "</page>\n" +
-                "\n" +
-                "</mediawiki>", fullXML);
-    }
-
-
-    @Test
-    public void testGGenerateCategoryPages_realCall() throws IOException {
-
-        List<Page> pages = service.readExcelInputFile("allData20190914.xls", 0, 0, 10000);
-        String fullXML = service.generateAllCategoryPagesXML(pages);
-
-        FileUtils.writeStringToFile(new File("files/new-allCategoryPages.xml"), fullXML, "UTF-8");
-
-    }
-
-    @Test
-    public void testGenerateListOfContents_two() throws IOException {
-        List<Page> pages = Arrays.asList(new Page("", "", "", "cat1", ""),
-                new Page("", "", "", "cat2", ""));
-
-        String res = service.generateListOfContents(pages);
-
-        assertEquals("\n" +
-                "[[:Категория:cat1|cat1]]\n" +
-                "\n" +
-                "[[:Категория:cat2|cat2]]\n", res);
-    }
-
-    @Test
-    public void testGenerateListOfContents_one_is_short() throws IOException {
-        List<Page> pages = Arrays.asList(new Page("", "", "", "x", ""),
-                new Page("", "", "", "cat2", ""));
-
-        String res = service.generateListOfContents(pages);
-
-        assertEquals("\n" +
-                "[[:Категория:cat2|cat2]]\n", res);
-    }
-
-    @Test
-    public void testGenerateListOfContents_two_unsorded() throws IOException {
-        List<Page> pages = Arrays.asList(new Page("", "", "", "bbb", ""),
-                new Page("", "", "", "aaa", ""));
-
-        String res = service.generateListOfContents(pages);
-
-        assertEquals("\n" +
-                "[[:Категория:aaa|aaa]]\n" +
-                "\n" +
-                "[[:Категория:bbb|bbb]]\n", res);
-    }
-
-    @Test
-    public void testGenerateListOfContents_two_with_duplicate() throws IOException {
-        List<Page> pages = Arrays.asList(new Page("", "", "", "cat1", ""),
-                new Page("", "", "", "cat2", ""),
-                new Page("", "", "", "cat1", ""));
-
-        String res = service.generateListOfContents(pages);
-
-        assertEquals("\n" +
-                "[[:Категория:cat1|cat1]]\n" +
-                "\n" +
-                "[[:Категория:cat2|cat2]]\n", res);
-    }
-
-
-    @Test
-    public void testGenerateListOfContents() throws IOException {
-
-        List<Page> pages = Arrays.asList(new Page("", "", "", "cat1", ""),
-                new Page("", "", "", "cat2", ""));
-
-        String categoriesContent = service.generateListOfContents(pages);
-        System.out.println("\n\n");
-        System.out.println(categoriesContent);
-
-        String listOfContentsXML = service.generateListOfContentsTemplatePage(categoriesContent);
-        String fullXML = service.generateFullXML("pages", Collections.singletonList(listOfContentsXML));
-
-        assertEquals("<mediawiki xmlns=\"http://www.mediawiki.org/xml/export-0.9/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                "           xsi:schemaLocation=\"http://www.mediawiki.org/xml/export-0.9/ http://www.mediawiki.org/xml/export-0.9.xsd\"\n" +
-                "           version=\"0.9\" xml:lang=\"ru\">\n" +
-                "<page>\n" +
-                "    <title>Шаблон:ListOfContent</title>\n" +
-                "    <revision>\n" +
-                "        <contributor>\n" +
-                "            <id>$adminUserId</id>\n" +
-                "        </contributor>\n" +
-                "        <text xml:space=\"preserve\" bytes=\"112\">&lt;h1&gt;Разделы энциклопедии&lt;/h1&gt;\n" +
-                "[[:Категория:cat1|cat1]]\n" +
-                "\n" +
-                "[[:Категория:cat2|cat2]]\n" +
-                "</text>\n" +
-                "        <format>text/x-wiki</format>\n" +
-                "    </revision>\n" +
-                "</page>\n" +
-                "</mediawiki>", fullXML);
-
-    }
-
-    @Test
-    public void testGenerateListOfContents_realCall() throws IOException {
-
-        List<Page> pages = service.readExcelInputFile("allData20190914.xls", 0, 0, 10000);
-        String categoriesContent = service.generateListOfContents(pages);
-        System.out.println("\n\n");
-        System.out.println(categoriesContent);
-
-        String listOfContentsXML = service.generateListOfContentsTemplatePage(categoriesContent);
-        String fullXML = service.generateFullXML("pages", Collections.singletonList(listOfContentsXML));
-
-        FileUtils.writeStringToFile(new File("files/new-listOfContents.xml"), fullXML, "UTF-8");
-
-    }
-
-
-
-    @Test
     public void testReadExcelInputFile_noSource() {
 
         int maxNumberOfLines = 1;
 
-        List<Page> pages = service.readExcelInputFile("noSourceData.xls", 0, 0, maxNumberOfLines);
+        List<Page> pages = service.readExcelInputFile("/noSourceData.xls", 0, 0, maxNumberOfLines);
 
         assertEquals(1, pages.size());
         Page page = pages.get(0);
@@ -406,7 +274,7 @@ public class MediaWikiProcessorTest {
 
         int maxNumberOfLines = 1;
 
-        List<Page> pages = service.readExcelInputFile("noSourceData.xls", 0, 1, maxNumberOfLines);
+        List<Page> pages = service.readExcelInputFile("/noSourceData.xls", 0, 1, maxNumberOfLines);
 
         assertEquals(1, pages.size());
         Page page = pages.get(0);
@@ -418,7 +286,7 @@ public class MediaWikiProcessorTest {
     @Test
     public void testGenerateHomePage() {
 
-        List<String> strings = MWFileUtils.readKeywords(this.getClass(), "categories.txt", false);
+        List<String> strings = MWFileUtils.readFileLines(this.getClass(), "/categories.txt", false);
 
         String res = service.generateHomePage(strings);
         assertEquals("<h1>Разделы энциклопедии</h1>\n" +

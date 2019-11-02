@@ -1,3 +1,5 @@
+package com.grenader.mediawiki;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -6,7 +8,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,8 +24,10 @@ import java.util.stream.Collectors;
 public class MediaWikiProcessor {
 
     public static final int SKIP_FIRST_LINES = 1;
-    private final VelocityEngine ve;
 
+    @Autowired
+    TemplateHandlingService templateService;
+    
     @RequestMapping("/")
     String home() {
         return "Hello World!";
@@ -33,16 +37,6 @@ public class MediaWikiProcessor {
         SpringApplication.run(MediaWikiProcessor.class, args);
 
         perform();
-
-    }
-
-    public MediaWikiProcessor() {
-
-        ve = new VelocityEngine();
-        Properties p = new Properties();
-        p.setProperty("resource.loader", "class");
-        p.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-        ve.init(p);
 
     }
 
@@ -173,10 +167,10 @@ public class MediaWikiProcessor {
 
     public String generateQandAPage(Page page) {
         // Old format: one category
-        //        Template t = ve.getTemplate("wiki-one-QandA-xml.vm", "UTF-8");
+        //        Template t = ve.getTemplate("wiki-one-QandA-xml.vm");
 
         // New format: several categories
-        Template t = ve.getTemplate("wiki-one-QandA-xml.vm", "UTF-8");
+        Template t = templateService.getTemplate("wiki-one-QandA-xml.vm");
 
 
         VelocityContext context = new VelocityContext();
@@ -205,7 +199,7 @@ public class MediaWikiProcessor {
 
 
     public String generateVideoPage(Page page) {
-        Template t = ve.getTemplate("wiki-one-video-xml.vm", "UTF-8");
+        Template t = templateService.getTemplate("wiki-one-video-xml.vm");
 
         VelocityContext context = new VelocityContext();
 
@@ -233,42 +227,12 @@ public class MediaWikiProcessor {
         return writer.toString();
     }
 
-
-    public String generateListOfContentsTemplatePage(String content) {
-        Template t = ve.getTemplate("wiki-ListOfContents-xml.vm", "UTF-8");
-
-        VelocityContext context = new VelocityContext();
-
-        context.put("allCategories", content);
-
-        StringWriter writer = new StringWriter();
-        t.merge(context, writer);
-        return writer.toString();
-    }
-
     String generateKeywordsBlock(String keywords) {
 
         List<String> keys = Arrays.asList(keywords.split(","));
 
         return keys.stream().map(String::trim).filter(v -> !StringUtils.isEmpty(v)).map(v -> getKeywordSearchLine(v)).collect(Collectors.joining(", "));
     }
-
-    public String generateFullXML(String keywordName, List<String> contentItems) {
-        /*  first, get and initialize an engine  */
-        /*  next, get the Template  */
-        Template t = ve.getTemplate("wiki-header-xml.vm", "UTF-8");
-        /*  create a context and add data */
-        VelocityContext context = new VelocityContext();
-
-        context.put(keywordName, String.join("\n", contentItems));
-
-        /* now render the template into a StringWriter */
-        StringWriter writer = new StringWriter();
-        t.merge(context, writer);
-
-        return writer.toString();
-    }
-
 
     public String generateHomePage(List<String> strings) {
         Set<String> cats = new TreeSet<>(strings);
@@ -291,46 +255,7 @@ public class MediaWikiProcessor {
         }
     }
 
-    public String generateListOfContents(List<Page> pages) {
-
-        Set<String> sortedCategories = getSortedCategories(pages);
-
-        StringBuilder res = new StringBuilder();
-        for (String category : sortedCategories) {
-            res.append("\n" + "[[:Категория:").append(category).append("|").append(category).append("]]\n");
-        }
-        return res.toString();
-    }
 
 
-    public String generateCategoryPage(String pageName) {
-        Template t = ve.getTemplate("wiki-category-page-xml.vm", "UTF-8");
-
-        VelocityContext context = new VelocityContext();
-
-        context.put("pageTitle", pageName);
-
-        StringWriter writer = new StringWriter();
-        t.merge(context, writer);
-        return writer.toString();
-    }
-
-     TreeSet<String> getSortedCategories(List<Page> pages) {
-        return pages.stream().filter(name -> name.getPageCategory() != null && name.getPageCategory().length() > 1).map(Page::getPageCategory).distinct().collect(Collectors.toCollection(TreeSet::new));
-    }
-
-    public String generateAllCategoryPagesXML(List<Page> pages) {
-
-        TreeSet<String> sortedCategories = getSortedCategories(pages);
-
-        StringBuilder res = new StringBuilder();
-
-        for (String categoryName : sortedCategories) {
-            res.append(generateCategoryPage("Категория:"+categoryName)).append("\n");
-        }
-//        String allCategories = cats.stream().map(str -> "[[:Категория:" + str + "|" + str + "]]\n").collect(Collectors.joining("\n"));
-
-        return generateFullXML("pages",  Collections.singletonList(res.toString()));
-    }
 }
 

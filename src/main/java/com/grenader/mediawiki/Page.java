@@ -1,3 +1,5 @@
+package com.grenader.mediawiki;
+
 /**
  * Created by ikanshyn on 2017-07-11.
  */
@@ -78,7 +80,7 @@ public class Page {
 
     @Override
     public String toString() {
-        return "Page{" +
+        return "com.grenader.mediawiki.Page{" +
                 "pageName='" + pageName + '\'' +
                 ", adminUserId=" + adminUserId +
                 ", pageContent='" + pageContent + '\'' +

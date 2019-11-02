@@ -1,9 +1,15 @@
+package com.grenader.mediawiki;
+
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+
 
 public class KeywordsCategoryStrategyTest {
 
@@ -12,7 +18,7 @@ public class KeywordsCategoryStrategyTest {
     @Test
     public void testReadKeywords() throws IOException {
 
-        List<String> strings = MWFileUtils.readKeywords(this.getClass(), "/keywords.txt", true);
+        List<String> strings = MWFileUtils.readFileLines(this.getClass(), "/keywords.txt", true);
 
         assertEquals(199, strings.size());
 

@@ -1,3 +1,5 @@
+package com.grenader.mediawiki;
+
 import org.apache.poi.hssf.usermodel.HSSFRow;
 
 import java.util.ArrayList;
@@ -11,7 +13,7 @@ public class KeywordsCategoryStrategy implements CategoryStrategy {
     public KeywordsCategoryStrategy() {
 
         // Load keywords
-        keywords = MWFileUtils.readKeywords(KeywordsCategoryStrategy.class, "/keywords.txt", true);
+        keywords = MWFileUtils.readFileLines(KeywordsCategoryStrategy.class, "/keywords.txt", true);
     }
 
     public String getNewCategoryNameByKeywords(HSSFRow row) {
