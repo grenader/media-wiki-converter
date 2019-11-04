@@ -48,7 +48,7 @@ public class MediaWikiProcessorTest {
 
     @Test
     public void testRealExcelInputFile_realBigData() {
-        service.readExcelInputFile("bigData20190912.xls", 0, 0, 10);
+        service.readExcelInputFile("/bigData20190912.xls", 0, 0, 10);
         String fullXML = "";
         assertEquals("", fullXML);
     }
@@ -189,7 +189,7 @@ public class MediaWikiProcessorTest {
     @Test
     public void testRealExcelInputFile() {
 
-        service.readExcelInputFile("data-test.xls", 0, 0, 20);
+        service.readExcelInputFile("/data-test.xls", 0, 0, 20);
 
         String fullXML = "";
 
@@ -200,7 +200,7 @@ public class MediaWikiProcessorTest {
     @Test
     public void testRealExcelInputFile_realData() {
 
-        service.readExcelInputFile("bigData.xls", 0, 0, 1200);
+        service.readExcelInputFile("/bigData.xls", 0, 0, 1200);
 
         String fullXML = "";
 
@@ -227,28 +227,32 @@ public class MediaWikiProcessorTest {
     }
 
     @Test
-    public void testGenerateXML() throws IOException {
+    public void testGenerateXML_real() throws IOException {
+        final int stepSize = 600;
 
-        int maxNumberOfLines = 100;
+        int startFrom = 0;
+        int gotRecords;
+            do {
+                List<Page> pages = service.readExcelInputFile("/bigData201910152.xls", 0, startFrom, stepSize);
 
-        List<Page> pages = service.readExcelInputFile("allData20190914.xls", 0, 800, maxNumberOfLines);
+                gotRecords = pages.size();
+                if (gotRecords == 0)
+                    break;
+                List<String> pagesXML = new ArrayList<>();
+                for (Page page : pages) {
+                    String onePageBlock;
+                    if (page.getVideo() == null)
+                        onePageBlock = service.generateQandAPage(page);
+                    else
+                        onePageBlock = service.generateVideoPage(page);
+                    pagesXML.add(onePageBlock);
+                }
 
-        List<String> pagesXML = new ArrayList<>();
-        for (Page page : pages) {
-            String onePageBlock;
-            if (page.getVideo() == null)
-                onePageBlock = service.generateQandAPage(page);
-            else
-                onePageBlock = service.generateVideoPage(page);
-            pagesXML.add(onePageBlock);
-        }
-
-        String fullXML = templateService.generateFullXML("pages", pagesXML);
-
-        FileUtils.writeStringToFile(new File("files/new-simple-" + maxNumberOfLines + ".xml"), fullXML, "UTF-8");
-
-        System.out.println("\n\n");
-        System.out.println(fullXML);
+                String fullXML = templateService.generateFullXML("pages", pagesXML);
+                FileUtils.writeStringToFile(new File("files/multipart-" + startFrom + "-" + gotRecords + ".xml"), fullXML, "UTF-8");
+                System.out.println("startFrom = " + startFrom+", gotRecords = " + gotRecords);
+                startFrom += stepSize;
+            } while (true);
     }
 
     @Test

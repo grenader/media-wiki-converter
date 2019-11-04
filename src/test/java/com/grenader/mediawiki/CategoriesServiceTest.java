@@ -119,7 +119,7 @@ public class CategoriesServiceTest {
     @Test
     public void testGGenerateCategoryPages_realCall() throws IOException {
 
-        List<Page> pages = parsingService.readExcelInputFile("allData20190914.xls", 0, 0, 10000);
+        List<Page> pages = parsingService.readExcelInputFile("/bigData201910152.xls", 0, 0, 10000);
         String fullXML = service.generateAllCategoryPagesXML(pages);
 
         FileUtils.writeStringToFile(new File("files/new-allCategoryPages.xml"), fullXML, "UTF-8");
@@ -165,7 +165,7 @@ public class CategoriesServiceTest {
     @Test
     public void testGenerateListOfContents_realCall() throws IOException {
 
-        List<Page> pages = parsingService.readExcelInputFile("allData20190914.xls", 0, 0, 10000);
+        List<Page> pages = parsingService.readExcelInputFile("/bigData201910152.xls", 0, 0, 10000);
         String categoriesContent = service.generateListOfContents(pages);
         System.out.println("\n\n");
         System.out.println(categoriesContent);
