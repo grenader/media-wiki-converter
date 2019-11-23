@@ -1,0 +1,25 @@
+-rw-r--r-- 1 bruze bruze   11411 Nov  9 12:42 annotations-api.jar
+-rw-r--r-- 1 bruze bruze   56350 Nov  9 12:42 catalina-ant.jar
+-rw-r--r-- 1 bruze bruze  132077 Nov  9 12:42 catalina-ha.jar
+-rw-r--r-- 1 bruze bruze 1706274 Nov  9 12:42 catalina.jar
+-rw-r--r-- 1 bruze bruze  269582 Nov  9 12:42 catalina-tribes.jar
+-rw-r--r-- 1 bruze bruze 2310271 Nov  9 12:42 ecj-4.4.2.jar
+-rw-r--r-- 1 bruze bruze   55535 Nov 17 11:57 el-api.jar
+drwxr-xr-x 2 bruze bruze    4096 Nov 10 14:03 ext
+-rw-r--r-- 1 bruze bruze  124750 Nov 10 14:28 jasper-el.jar
+-rw-r--r-- 1 bruze bruze  598396 Nov 10 14:28 jasper.jar
+-rw-r--r-- 1 bruze bruze   87805 Nov 17 11:58 jsp-api.jar
+-rw-r--r-- 1 bruze bruze    1268 Nov  9 12:33 res.txt
+-rw-r--r-- 1 bruze bruze  198014 Nov 17 11:57 servlet-api.jar
+-rw-r--r-- 1 bruze bruze  229197 Nov  9 12:42 tomcat7-websocket.jar
+-rw-r--r-- 1 bruze bruze    6574 Nov  9 12:42 tomcat-api.jar
+-rw-r--r-- 1 bruze bruze  836841 Nov  9 12:42 tomcat-coyote.jar
+-rw-r--r-- 1 bruze bruze  261391 Nov  9 12:42 tomcat-dbcp.jar
+-rw-r--r-- 1 bruze bruze   70258 Nov  9 12:42 tomcat-i18n-es.jar
+-rw-r--r-- 1 bruze bruze   50619 Nov  9 12:42 tomcat-i18n-fr.jar
+-rw-r--r-- 1 bruze bruze   52430 Nov  9 12:42 tomcat-i18n-ja.jar
+-rw-r--r-- 1 bruze bruze   14602 Nov  9 12:42 tomcat-i18n-ru.jar
+-rw-r--r-- 1 bruze bruze  141085 Nov  9 12:42 tomcat-jdbc.jar
+-rw-r--r-- 1 bruze bruze   54940 Nov  9 12:42 tomcat-util.jar
+-rw-r--r-- 1 bruze bruze   38051 Nov  9 12:42 websocket-api.jar
+
