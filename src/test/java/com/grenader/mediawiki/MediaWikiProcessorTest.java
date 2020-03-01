@@ -69,7 +69,7 @@ public class MediaWikiProcessorTest {
                 "        </contributor>\n" +
                 "        <text xml:space=\"preserve\" bytes=\"112\">Вопрос: '''Title'''\n" +
                 "\n" +
-                "Ответ ''Александра Геннадьевича'':\n" +
+                "Ответ [[Александр Геннадьевич Хакимов | Александра Геннадьевича]]:\n" +
                 "\n" +
                 "Content\n" +
                 "\n" +
