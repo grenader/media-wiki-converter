@@ -98,7 +98,7 @@ public class MediaWikiProcessorTest {
                 "Вопрос: '''Title'''\n" +
                 "\n" +
                 "\n" +
-                "Ответ Александра Геннадьевича:\n" +
+                "Ответ [[Александр Геннадьевич Хакимов | Александра Геннадьевича]]:\n" +
                 "{{#widget:Answer|text=Content}}\n" +
                 "\n" +
                 "\n" +
@@ -132,7 +132,7 @@ public class MediaWikiProcessorTest {
                 "Вопрос: '''Title'''\n" +
                 "\n" +
                 "\n" +
-                "Ответ Александра Геннадьевича:\n" +
+                "Ответ [[Александр Геннадьевич Хакимов | Александра Геннадьевича]]:\n" +
                 "{{#widget:Answer|text=Content}}\n" +
                 "\n" +
                 "Ключевые слова: [{{SERVER}}/index.php?search=Keywords&amp;title=Служебная%3AПоиск&amp;go=Перейти Keywords]\n" +
