@@ -1,19 +1,13 @@
 package com.grenader.mediawiki;
 
-import com.grenader.mediawiki.MWFileUtils;
-import com.grenader.mediawiki.MediaWikiProcessor;
-import com.grenader.mediawiki.Page;
-import com.grenader.mediawiki.TemplateHandlingService;
-import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -69,7 +63,7 @@ public class MediaWikiProcessorTest {
                 "        </contributor>\n" +
                 "        <text xml:space=\"preserve\" bytes=\"112\">Вопрос: '''Title'''\n" +
                 "\n" +
-                "Ответ ''Александра Геннадьевича'':\n" +
+                "Ответ [[Александр Геннадьевич Хакимов | Александра Геннадьевича]]:\n" +
                 "\n" +
                 "Content\n" +
                 "\n" +
@@ -104,7 +98,7 @@ public class MediaWikiProcessorTest {
                 "Вопрос: '''Title'''\n" +
                 "\n" +
                 "\n" +
-                "Ответ Александра Геннадьевича:\n" +
+                "Ответ [[Александр Геннадьевич Хакимов | Александра Геннадьевича]]:\n" +
                 "{{#widget:Answer|text=Content}}\n" +
                 "\n" +
                 "\n" +
@@ -138,7 +132,7 @@ public class MediaWikiProcessorTest {
                 "Вопрос: '''Title'''\n" +
                 "\n" +
                 "\n" +
-                "Ответ Александра Геннадьевича:\n" +
+                "Ответ [[Александр Геннадьевич Хакимов | Александра Геннадьевича]]:\n" +
                 "{{#widget:Answer|text=Content}}\n" +
                 "\n" +
                 "Ключевые слова: [{{SERVER}}/index.php?search=Keywords&amp;title=Служебная%3AПоиск&amp;go=Перейти Keywords]\n" +
@@ -224,35 +218,6 @@ public class MediaWikiProcessorTest {
     public void testGetCategoryName_Empty() {
         String categoryName = service.getCategoryName("");
         assertEquals("", categoryName);
-    }
-
-    @Test
-    public void testGenerateXML_real() throws IOException {
-        final int stepSize = 600;
-
-        int startFrom = 0;
-        int gotRecords;
-            do {
-                List<Page> pages = service.readExcelInputFile("/bigData201910152.xls", 0, startFrom, stepSize);
-
-                gotRecords = pages.size();
-                if (gotRecords == 0)
-                    break;
-                List<String> pagesXML = new ArrayList<>();
-                for (Page page : pages) {
-                    String onePageBlock;
-                    if (page.getVideo() == null)
-                        onePageBlock = service.generateQandAPage(page);
-                    else
-                        onePageBlock = service.generateVideoPage(page);
-                    pagesXML.add(onePageBlock);
-                }
-
-                String fullXML = templateService.generateFullXML("pages", pagesXML);
-                FileUtils.writeStringToFile(new File("files/multipart-" + startFrom + "-" + gotRecords + ".xml"), fullXML, "UTF-8");
-                System.out.println("startFrom = " + startFrom+", gotRecords = " + gotRecords);
-                startFrom += stepSize;
-            } while (true);
     }
 
     @Test

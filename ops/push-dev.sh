@@ -1,9 +1,9 @@
-echo "Pushing a new image of MediaWiki PHP side"
+echo "Pushing a new image of Dev version MediaWiki PHP side"
 echo "Note, that it requires 'docker login'"
 
 [[ -z "$1" ]] && { echo "Parameter "container name``" (1) is empty" ; exit 1; }
 
-OUTPUT="$(date +"%Y%b%d%H")"
+OUTPUT="$(date +"Dev%Y%b%d%H")"
 #echo "$OUTPUT" | tr '[:upper:]' '[:lower:]'
 repoName=`echo "$OUTPUT" | tr '[:upper:]' '[:lower:]'`
 

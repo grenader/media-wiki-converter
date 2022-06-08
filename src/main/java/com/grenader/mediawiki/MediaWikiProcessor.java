@@ -1,6 +1,5 @@
 package com.grenader.mediawiki;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -11,6 +10,7 @@ import org.apache.velocity.VelocityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -88,7 +88,7 @@ public class MediaWikiProcessor {
                             removeExtraCommas(row.getCell(6).getStringCellValue()));
 
                     if (row.getCell(5) != null &&
-                            !StringUtils.isEmpty(row.getCell(5).getStringCellValue())
+                            StringUtils.hasText(row.getCell(5).getStringCellValue())
                             && !"-".equals(row.getCell(5).getStringCellValue()))
                     // Video Answers
                     {
@@ -126,7 +126,7 @@ public class MediaWikiProcessor {
             return null;
         String value = cell.getStringCellValue().trim();
 
-        if (StringUtils.isEmpty(value))
+        if (!StringUtils.hasText(value))
             return null;
         else
             return value;
@@ -139,7 +139,7 @@ public class MediaWikiProcessor {
     }
 
     private String removeExtraCommas(String str) {
-        if (StringUtils.isEmpty(str))
+        if (!StringUtils.hasText(str))
             return "";
         str = str.trim();
         if (str.startsWith(","))
@@ -231,7 +231,7 @@ public class MediaWikiProcessor {
 
         List<String> keys = Arrays.asList(keywords.split(","));
 
-        return keys.stream().map(String::trim).filter(v -> !StringUtils.isEmpty(v)).map(v -> getKeywordSearchLine(v)).collect(Collectors.joining(", "));
+        return keys.stream().map(String::trim).filter(v -> StringUtils.hasText(v)).map(v -> getKeywordSearchLine(v)).collect(Collectors.joining(", "));
     }
 
     public String generateHomePage(List<String> strings) {
@@ -243,7 +243,7 @@ public class MediaWikiProcessor {
     }
 
     public String getKeywordSearchLine(String keyword) {
-        if (StringUtils.isEmpty(keyword))
+        if (!StringUtils.hasText(keyword))
             throw new IllegalArgumentException("keyword cannot be null or empty");
 
         try {
