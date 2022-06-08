@@ -39,6 +39,11 @@ public class MediaWikiProcessorRealTest {
         generateAll(600, "/new-part-20201017-2283-2480.xls", "20201017");
     }
 
+ @Test
+    public void testGenerateXML_real_new3() throws IOException {
+        generateAll(700, "/new-part-20220419_2481_3068.xls", "20220607");
+    }
+
     private void generateAll(int stepSize, String resourceFileName, String prefix) throws IOException {
         int startFrom = 0;
         int gotRecords;
